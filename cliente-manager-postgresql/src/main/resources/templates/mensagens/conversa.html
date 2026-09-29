@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appConfig.tituloExibicao} + ' - Conversa'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('mensagens')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Conversa</span>
+            <h2 th:text="${conversa.nomeContato != null and !conversa.nomeContato.isBlank()} ? ${conversa.nomeContato} : conversa.telefone"></h2>
+            <p th:text="${conversa.telefone}"></p>
+        </div>
+        <a class="btn secundario" th:href="@{/mensagens}">Voltar as conversas</a>
+    </section>
+
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+    <div class="aviso-simulacao" th:if="${modoSimulacao}">Nenhuma mensagem real sera enviada</div>
+
+    <div class="chat">
+        <div th:each="m : ${historico}" th:class="${m.remetente.name() == 'GABINETE'} ? 'bolha gabinete' : 'bolha cidadao'">
+            <span th:text="${m.conteudo}"></span>
+            <time th:text="${#temporals.format(m.dataHora, 'dd/MM HH:mm')}"></time>
+        </div>
+        <p th:if="${historico.isEmpty()}" class="ajuda">Nenhuma mensagem ainda.</p>
+    </div>
+
+    <div class="ficha">
+        <h2>Responder</h2>
+        <form th:action="@{/mensagens/{id}/responder(id=${conversa.id})}" method="post">
+            <div class="campo">
+                <textarea name="texto" placeholder="Escreva sua resposta..." required></textarea>
+            </div>
+            <button type="submit" class="btn">Enviar</button>
+        </form>
+
+        <div class="acoes-form">
+            <form th:action="@{/mensagens/{id}/atribuir(id=${conversa.id})}" method="post" style="display:inline">
+                <button type="submit" class="btn secundario">Atribuir a mim</button>
+            </form>
+            <form th:action="@{/mensagens/{id}/situacao(id=${conversa.id})}" method="post" style="display:inline">
+                <input type="hidden" name="novaSituacao" value="FINALIZADA">
+                <button type="submit" class="btn secundario">Marcar como finalizada</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="ficha" th:if="${conversa.cidadao == null}">
+        <h2>Cadastrar cidadao a partir desta conversa</h2>
+        <form th:action="@{/mensagens/{id}/cadastrar-cidadao(id=${conversa.id})}" method="post">
+            <div class="campo"><label for="nome">Nome</label><input type="text" id="nome" name="nome" required></div>
+            <div class="campo"><label for="cpf">CPF</label><input type="text" id="cpf" name="cpf" required></div>
+            <div class="campo"><label for="endereco">Endereco</label><input type="text" id="endereco" name="endereco"></div>
+            <button type="submit" class="btn secundario">Cadastrar e associar</button>
+        </form>
+    </div>
+
+    <div class="ficha" th:if="${conversa.cidadao != null}">
+        <h2>Registrar atendimento</h2>
+        <p class="ajuda">Cidadao associado: <a th:href="@{/clientes/{id}(id=${conversa.cidadao.id})}" th:text="${conversa.cidadao.nome}"></a></p>
+        <form th:action="@{/mensagens/{id}/registrar-atendimento(id=${conversa.id})}" method="post">
+            <div class="campo"><label for="descricao">Assunto do atendimento</label><input type="text" id="descricao" name="descricao" required></div>
+            <button type="submit" class="btn secundario">Registrar como atendimento</button>
+        </form>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

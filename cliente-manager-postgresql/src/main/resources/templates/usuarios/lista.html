@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appConfig.tituloExibicao} + ' - Usuarios'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('usuarios')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Administracao</span><h2>Gerenciamento de usuarios</h2><p>Controle quem pode acessar o sistema e com qual perfil.</p></div>
+        <a class="btn" th:href="@{/usuarios/novo}">+ Novo usuario</a>
+    </section>
+
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+
+    <table class="tabela">
+        <thead>
+        <tr><th>Nome</th><th>Usuario</th><th>Perfil</th><th>Situacao</th><th>Acoes</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="usuario : ${usuarios}">
+            <td th:text="${usuario.nomeCompleto}"></td>
+            <td th:text="${usuario.nomeUsuario}"></td>
+            <td><span th:class="'pill ' + ${#strings.toLowerCase(usuario.perfil.name())}" th:text="${usuario.perfil.descricao}"></span></td>
+            <td><span th:class="${usuario.ativo} ? 'pill ativo' : 'pill inativo'" th:text="${usuario.ativo} ? 'Ativo' : 'Bloqueado'"></span></td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap">
+                <a class="btn secundario" th:href="@{/usuarios/{id}/editar(id=${usuario.id})}">Editar</a>
+                <form th:action="@{/usuarios/{id}/bloquear(id=${usuario.id})}" method="post" th:if="${usuario.ativo}"
+                      onsubmit="return confirm('Bloquear este usuario?');">
+                    <button type="submit" class="btn perigo">Bloquear</button>
+                </form>
+                <form th:action="@{/usuarios/{id}/reativar(id=${usuario.id})}" method="post" th:unless="${usuario.ativo}">
+                    <button type="submit" class="btn secundario">Reativar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="vazio" th:if="${usuarios.isEmpty()}">
+        <p class="titulo-vazio">Nenhum usuario cadastrado</p>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

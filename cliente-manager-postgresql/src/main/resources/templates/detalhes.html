@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'Atendimentos de ' + ${cliente.nome} + ' - ' + ${appConfig.tituloExibicao}"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: cabecalho('cidadaos')}"></div>
+<main>
+    <section class="page-head"><div><span class="eyebrow">Historico do cidadao</span><h2 th:text="${cliente.nome}"></h2><p>Consulte e registre os atendimentos realizados.</p><p th:if="${cliente.telefone != null and !cliente.telefone.isBlank()}" th:text="|'Telefone: ' + ${cliente.telefone}|" class="endereco"></p></div></section>
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div class="barra-acoes">
+        <a class="btn secundario" th:href="@{/clientes}">Voltar aos cidadaos</a>
+        <a class="btn secundario" th:href="@{/clientes/{id}/editar(id=${cliente.id})}">Editar cidadao</a>
+    </div>
+
+    <section class="ficha ficha-servico">
+        <h2>Adicionar atendimento</h2>
+        <form th:action="@{/clientes/{id}/servicos(id=${cliente.id})}" th:object="${novoServico}" method="post">
+            <div class="linha-campos">
+                <div class="campo"><label for="dataServico">Data</label><input type="date" id="dataServico" th:field="*{dataServico}"><p class="erro-campo" th:if="${#fields.hasErrors('dataServico')}" th:errors="*{dataServico}"></p></div>
+                <div class="campo"><label for="valor">Valor (opcional)</label><input type="number" id="valor" th:field="*{valor}" min="0" step="0.01" placeholder="0,00"><p class="erro-campo" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></p></div>
+            </div>
+            <div class="campo"><label for="realizado">O atendimento foi realizado?</label><select id="realizado" th:field="*{realizado}"><option value="true">Sim, foi realizado</option><option value="false">Nao, ainda esta pendente</option></select></div>
+            <div class="campo"><label for="descricao">Assunto ou solicitacao</label><input type="text" id="descricao" th:field="*{descricao}" placeholder="Ex: Solicitacao de iluminacao publica, encaminhamento..."><p class="erro-campo" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></p></div>
+            <div class="campo"><label for="observacoes">Observacoes</label><textarea id="observacoes" th:field="*{observacoes}" placeholder="Detalhes do atendimento"></textarea><p class="erro-campo" th:if="${#fields.hasErrors('observacoes')}" th:errors="*{observacoes}"></p></div>
+            <button type="submit" class="btn">Adicionar ao historico</button>
+        </form>
+    </section>
+
+    <section class="historico">
+        <h2>Atendimentos registrados <span th:text="|(${servicos.size()})|"></span></h2>
+        <div class="servico" th:each="servico : ${servicos}">
+            <div><strong th:text="${servico.descricao}"></strong><p th:if="${servico.observacoes != null and !servico.observacoes.isBlank()}" th:text="${servico.observacoes}"></p></div>
+            <span class="status-servico realizado" th:if="${servico.realizado == true}">Realizado</span>
+            <span class="status-servico pendente" th:unless="${servico.realizado == true}">Pendente</span>
+            <time th:text="${#temporals.format(servico.dataServico, 'dd/MM/yyyy')}"></time>
+            <span class="valor" th:if="${servico.valor != null}" th:text="${#numbers.formatCurrency(servico.valor)}"></span>
+            <form th:action="@{/clientes/{clienteId}/servicos/{servicoId}/excluir(clienteId=${cliente.id},servicoId=${servico.id})}" method="post"
+                  sec:authorize="hasRole('ADMIN')"
+                  onsubmit="return confirm('Remover este atendimento?');"><button class="btn perigo" type="submit">Excluir</button></form>
+        </div>
+        <div class="vazio compacto" th:if="${servicos.isEmpty()}"><p class="titulo-vazio">Nenhum atendimento registrado</p><p>Use o formulario acima para adicionar o primeiro.</p></div>
+    </section>
+</main>
+<div th:replace="~{fragments/layout :: rodape}"></div>
+</body>
+</html>

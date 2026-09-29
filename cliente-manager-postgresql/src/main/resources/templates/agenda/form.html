@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="(${compromisso.id != null} ? 'Editar compromisso' : 'Novo compromisso') + ' - ' + ${appConfig.tituloExibicao}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('agenda')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Agenda</span><h2 th:text="${compromisso.id != null} ? 'Editar compromisso' : 'Novo compromisso'"></h2></div>
+        <a class="btn secundario" th:href="@{/agenda}">Voltar a agenda</a>
+    </section>
+
+    <div class="aviso-conflito" th:if="${conflitos != null and !conflitos.isEmpty()}">
+        <strong>Atencao: este horario conflita com outro(s) compromisso(s):</strong>
+        <ul>
+            <li th:each="c : ${conflitos}" th:text="${c.titulo} + ' (' + ${c.horaInicio} + ' - ' + ${c.horaFim} + ')'"></li>
+        </ul>
+        <p>Revise o horario ou marque a opcao abaixo para salvar mesmo assim.</p>
+    </div>
+
+    <div class="ficha">
+        <h2>Dados do compromisso</h2>
+        <form th:action="@{/agenda/salvar}" th:object="${compromisso}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" name="confirmarConflito" th:value="${conflitos != null and !conflitos.isEmpty()}">
+
+            <div class="campo">
+                <label for="titulo">Titulo</label>
+                <input type="text" id="titulo" th:field="*{titulo}" placeholder="Ex: Reuniao com lideranca do bairro">
+                <p class="erro-campo" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></p>
+            </div>
+
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" th:field="*{data}">
+                    <p class="erro-campo" th:if="${#fields.hasErrors('data')}" th:errors="*{data}"></p>
+                </div>
+                <div class="campo">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" th:field="*{tipo}">
+                        <option th:each="t : ${tipos}" th:value="${t}" th:text="${t.descricao}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label><input type="checkbox" th:field="*{diaInteiro}" style="width:auto"> Evento de dia inteiro</label>
+            </div>
+
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="horaInicio">Horario de inicio</label>
+                    <input type="time" id="horaInicio" th:field="*{horaInicio}">
+                </div>
+                <div class="campo">
+                    <label for="horaFim">Horario de termino</label>
+                    <input type="time" id="horaFim" th:field="*{horaFim}">
+                </div>
+            </div>
+
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="situacao">Situacao</label>
+                    <select id="situacao" th:field="*{situacao}">
+                        <option th:each="s : ${situacoes}" th:value="${s}" th:text="${s.descricao}"></option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="prioridade">Prioridade</label>
+                    <select id="prioridade" th:field="*{prioridade}">
+                        <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p.descricao}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="local">Local</label>
+                <input type="text" id="local" th:field="*{local}" placeholder="Ex: Sede do gabinete">
+            </div>
+
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="nomeResponsavel">Nome do responsavel</label>
+                    <input type="text" id="nomeResponsavel" th:field="*{nomeResponsavel}">
+                </div>
+                <div class="campo">
+                    <label for="telefoneContato">Telefone de contato</label>
+                    <input type="text" id="telefoneContato" th:field="*{telefoneContato}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="cidadaoId">Cidadao relacionado (opcional)</label>
+                <select id="cidadaoId" name="cidadaoId">
+                    <option value="">Nenhum</option>
+                    <option th:each="pessoa : ${cidadaos}" th:value="${pessoa.id}" th:text="${pessoa.nome}"
+                            th:selected="${compromisso.cidadao != null and compromisso.cidadao.id == pessoa.id}"></option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="descricao">Descricao</label>
+                <textarea id="descricao" th:field="*{descricao}"></textarea>
+            </div>
+
+            <div class="campo">
+                <label for="observacoesInternas">Observacoes internas</label>
+                <textarea id="observacoesInternas" th:field="*{observacoesInternas}"></textarea>
+            </div>
+
+            <div class="acoes-form">
+                <button type="submit" class="btn" th:text="${conflitos != null and !conflitos.isEmpty()} ? 'Salvar mesmo assim' : 'Salvar'"></button>
+                <a class="btn secundario" th:href="@{/agenda}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

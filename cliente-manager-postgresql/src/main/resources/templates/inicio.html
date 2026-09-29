@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appConfig.tituloExibicao} + ' - Inicio'"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('inicio')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Painel</span><h2 th:text="'Ola, ' + ${#authentication.name}"></h2>
+            <p th:text="${appConfig.descricao}"></p></div>
+        <a class="btn" th:href="@{/agenda/novo}">+ Novo compromisso</a>
+    </section>
+
+    <section class="aniversarios" th:if="${!aniversariantes.isEmpty()}">
+        <span class="icone" aria-hidden="true">&#127874;</span><div><h2>Aniversariantes de hoje</h2>
+        <p>
+            Hoje e aniversario de
+            <span th:each="pessoa, iter : ${aniversariantes}">
+                <a th:href="@{/clientes/{id}(id=${pessoa.id})}" th:text="${pessoa.nome}"></a><span th:if="${!iter.last}">, </span>
+            </span>.
+        </p></div>
+    </section>
+
+    <section class="metricas" aria-label="Resumo">
+        <div class="metrica destaque"><span>Compromissos hoje</span><strong th:text="${compromissosHoje.size()}">0</strong></div>
+        <div class="metrica"><span>Pendentes de confirmacao</span><strong th:text="${pendentesConfirmacao.size()}">0</strong></div>
+        <div class="metrica"><span>Total de cidadaos</span><strong th:text="${totalCidadaos}">0</strong></div>
+    </section>
+
+    <div class="painel-inicio">
+        <div class="bloco">
+            <h3>Compromissos de hoje</h3>
+            <div th:if="${compromissosHoje.isEmpty()}" class="vazio compacto">
+                <p class="titulo-vazio">Nenhum compromisso para hoje</p>
+            </div>
+            <div th:each="c : ${compromissosHoje}" class="compromisso">
+                <span class="horario" th:text="${c.diaInteiro} ? 'Dia todo' : (${c.horaInicio} != null ? ${#temporals.format(c.horaInicio, 'HH:mm')} : '--:--')"></span>
+                <div>
+                    <p class="titulo-compromisso" th:text="${c.titulo}"></p>
+                    <p class="meta" th:text="${c.local}"></p>
+                </div>
+                <span th:class="'tag ' + ${#strings.toLowerCase(c.situacao.name())}" th:text="${c.situacao.descricao}"></span>
+                <a class="btn secundario" th:href="@{/agenda/{id}(id=${c.id})}">Ver</a>
+            </div>
+        </div>
+
+        <div class="bloco">
+            <h3>Proximo compromisso</h3>
+            <div th:if="${proximoCompromisso == null}" class="vazio compacto">
+                <p class="titulo-vazio">Nada agendado</p>
+            </div>
+            <div th:if="${proximoCompromisso != null}" class="compromisso" style="grid-template-columns:1fr">
+                <div>
+                    <p class="titulo-compromisso" th:text="${proximoCompromisso.titulo}"></p>
+                    <p class="meta" th:text="${#temporals.format(proximoCompromisso.data, 'dd/MM/yyyy')}"></p>
+                </div>
+            </div>
+            <h3 style="margin-top:20px">Pendentes de confirmacao</h3>
+            <p class="meta" th:if="${pendentesConfirmacao.isEmpty()}">Nenhum compromisso pendente.</p>
+            <ul th:unless="${pendentesConfirmacao.isEmpty()}" style="padding-left:18px;margin:0">
+                <li th:each="p : ${pendentesConfirmacao}">
+                    <a th:href="@{/agenda/{id}(id=${p.id})}" th:text="${p.titulo}"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <a class="btn secundario" th:href="@{/agenda}">Ver agenda completa</a>
+
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

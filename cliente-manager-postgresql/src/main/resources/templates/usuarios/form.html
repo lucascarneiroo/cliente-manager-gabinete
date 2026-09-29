@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="(${usuario.id != null} ? 'Editar usuario' : 'Novo usuario') + ' - ' + ${appConfig.tituloExibicao}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('usuarios')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Administracao</span><h2 th:text="${usuario.id != null} ? 'Editar usuario' : 'Novo usuario'"></h2></div>
+        <a class="btn secundario" th:href="@{/usuarios}">Voltar a lista</a>
+    </section>
+
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+
+    <div class="ficha">
+        <h2 th:text="${usuario.id != null} ? 'Dados do usuario' : 'Dados de acesso'"></h2>
+
+        <form th:if="${usuario.id == null}" th:action="@{/usuarios/novo}" method="post">
+            <div class="campo">
+                <label for="nomeCompleto">Nome completo</label>
+                <input type="text" id="nomeCompleto" name="nomeCompleto" th:value="${usuario.nomeCompleto}" required>
+            </div>
+            <div class="campo">
+                <label for="nomeUsuario">Usuario</label>
+                <input type="text" id="nomeUsuario" name="nomeUsuario" th:value="${usuario.nomeUsuario}" required>
+            </div>
+            <div class="campo">
+                <label for="perfil">Perfil</label>
+                <select id="perfil" name="perfil">
+                    <option th:each="p : ${perfis}" th:value="${p}" th:text="${p.descricao}" th:selected="${p == usuario.perfil}"></option>
+                </select>
+            </div>
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" th:attr="minlength=${tamanhoMinimoSenha}" required>
+                    <p class="ajuda" th:text="'Minimo de ' + ${tamanhoMinimoSenha} + ' caracteres.'"></p>
+                </div>
+                <div class="campo">
+                    <label for="confirmacaoSenha">Confirmar senha</label>
+                    <input type="password" id="confirmacaoSenha" name="confirmacaoSenha" th:attr="minlength=${tamanhoMinimoSenha}" required>
+                </div>
+            </div>
+            <div class="acoes-form">
+                <button type="submit" class="btn">Criar usuario</button>
+                <a class="btn secundario" th:href="@{/usuarios}">Cancelar</a>
+            </div>
+        </form>
+
+        <form th:if="${usuario.id != null}" th:action="@{/usuarios/{id}/editar(id=${usuario.id})}" method="post">
+            <div class="campo">
+                <label for="nomeCompleto2">Nome completo</label>
+                <input type="text" id="nomeCompleto2" name="nomeCompleto" th:value="${usuario.nomeCompleto}" required>
+            </div>
+            <div class="campo">
+                <label>Usuario</label>
+                <input type="text" th:value="${usuario.nomeUsuario}" disabled>
+            </div>
+            <div class="campo">
+                <label for="perfil2">Perfil</label>
+                <select id="perfil2" name="perfil">
+                    <option th:each="p : ${perfis}" th:value="${p}" th:text="${p.descricao}" th:selected="${p == usuario.perfil}"></option>
+                </select>
+            </div>
+            <div class="acoes-form">
+                <button type="submit" class="btn">Salvar alteracoes</button>
+                <a class="btn secundario" th:href="@{/usuarios}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="ficha" th:if="${usuario.id != null}">
+        <h2>Redefinir senha</h2>
+        <form th:action="@{/usuarios/{id}/redefinir-senha(id=${usuario.id})}" method="post">
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="novaSenha">Nova senha</label>
+                    <input type="password" id="novaSenha" name="novaSenha" th:attr="minlength=${tamanhoMinimoSenha}" required>
+                </div>
+                <div class="campo">
+                    <label for="confirmacaoSenha2">Confirmar nova senha</label>
+                    <input type="password" id="confirmacaoSenha2" name="confirmacaoSenha" th:attr="minlength=${tamanhoMinimoSenha}" required>
+                </div>
+            </div>
+            <p class="ajuda" th:text="'Minimo de ' + ${tamanhoMinimoSenha} + ' caracteres. A senha e o hash nunca sao exibidos.'"></p>
+            <div class="acoes-form">
+                <button type="submit" class="btn secundario">Redefinir senha</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

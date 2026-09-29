@@ -1,0 +1,22 @@
+target/
+*.class
+
+# Banco H2 local (dados de teste)
+data/
+*.mv.db
+*.trace.db
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Variaveis de ambiente locais (nunca subir senha real)
+.env

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${compromisso.titulo} + ' - ' + ${appConfig.tituloExibicao}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('agenda')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow" th:text="${compromisso.tipo.descricao}"></span><h2 th:text="${compromisso.titulo}"></h2>
+            <p th:text="${#temporals.format(compromisso.data, 'dd/MM/yyyy')} + (${compromisso.diaInteiro} ? ' - dia todo' : (' - ' + ${compromisso.horaInicio} + ' as ' + ${compromisso.horaFim}))"></p>
+        </div>
+        <a class="btn secundario" th:href="@{/agenda}">Voltar a agenda</a>
+    </section>
+
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+
+    <div class="ficha">
+        <p><span th:class="'tag ' + ${#strings.toLowerCase(compromisso.situacao.name())}" th:text="${compromisso.situacao.descricao}"></span>
+           &nbsp;<span th:class="'tag ' + ${#strings.toLowerCase(compromisso.prioridade.name())}" th:text="${compromisso.prioridade.descricao}"></span></p>
+
+        <p th:if="${compromisso.local != null and !compromisso.local.isBlank()}"><strong>Local:</strong> <span th:text="${compromisso.local}"></span></p>
+        <p th:if="${compromisso.nomeResponsavel != null and !compromisso.nomeResponsavel.isBlank()}"><strong>Responsavel:</strong> <span th:text="${compromisso.nomeResponsavel}"></span></p>
+        <p th:if="${compromisso.telefoneContato != null and !compromisso.telefoneContato.isBlank()}"><strong>Telefone:</strong> <span th:text="${compromisso.telefoneContato}"></span></p>
+        <p th:if="${compromisso.cidadao != null}"><strong>Cidadao relacionado:</strong>
+            <a th:href="@{/clientes/{id}(id=${compromisso.cidadao.id})}" th:text="${compromisso.cidadao.nome}"></a></p>
+        <p th:if="${compromisso.descricao != null and !compromisso.descricao.isBlank()}"><strong>Descricao:</strong> <span th:text="${compromisso.descricao}"></span></p>
+        <p th:if="${compromisso.observacoesInternas != null and !compromisso.observacoesInternas.isBlank()}"><strong>Observacoes internas:</strong> <span th:text="${compromisso.observacoesInternas}"></span></p>
+
+        <p class="ajuda">
+            Criado por <span th:text="${compromisso.criadoPor}"></span> em <span th:text="${#temporals.format(compromisso.criadoEm, 'dd/MM/yyyy HH:mm')}"></span>
+            <span th:if="${compromisso.atualizadoPor != null}"> - ultima alteracao por <span th:text="${compromisso.atualizadoPor}"></span> em <span th:text="${#temporals.format(compromisso.atualizadoEm, 'dd/MM/yyyy HH:mm')}"></span></span>
+        </p>
+
+        <div class="acoes-form">
+            <a class="btn secundario" th:href="@{/agenda/{id}/editar(id=${compromisso.id})}">Editar</a>
+
+            <form th:action="@{/agenda/{id}/situacao(id=${compromisso.id})}" method="post" style="display:inline">
+                <input type="hidden" name="novaSituacao" value="CONFIRMADO">
+                <button type="submit" class="btn secundario">Confirmar</button>
+            </form>
+            <form th:action="@{/agenda/{id}/situacao(id=${compromisso.id})}" method="post" style="display:inline">
+                <input type="hidden" name="novaSituacao" value="REALIZADO">
+                <button type="submit" class="btn secundario">Marcar como realizado</button>
+            </form>
+            <form th:action="@{/agenda/{id}/situacao(id=${compromisso.id})}" method="post" style="display:inline">
+                <input type="hidden" name="novaSituacao" value="ADIADO">
+                <button type="submit" class="btn secundario">Adiar</button>
+            </form>
+            <form th:action="@{/agenda/{id}/cancelar(id=${compromisso.id})}" method="post" style="display:inline"
+                  onsubmit="return confirm('Cancelar este compromisso?');">
+                <button type="submit" class="btn perigo">Cancelar</button>
+            </form>
+            <form th:action="@{/agenda/{id}/excluir(id=${compromisso.id})}" method="post" style="display:inline"
+                  sec:authorize="hasRole('ADMIN')"
+                  onsubmit="return confirm('Excluir definitivamente este compromisso? Esta acao nao pode ser desfeita.');">
+                <button type="submit" class="btn perigo">Excluir definitivamente</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

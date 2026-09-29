@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<style th:fragment="cores" th:inline="text">
+    :root{
+        --navy: [[${appConfig.corPrimaria}]];
+        --navy2: [[${appConfig.corPrimaria}]];
+        --blue: [[${appConfig.corSecundaria}]];
+        --blue2: [[${appConfig.corSecundaria}]];
+    }
+</style>
+
+<div th:fragment="cabecalho(paginaAtiva)">
+    <div class="faixa" th:classappend="${appConfig.ambienteDemonstracao} ? 'faixa-visivel' : ''"
+         th:if="${appConfig.ambienteDemonstracao}">
+        Ambiente de demonstracao - nenhum dado real e nenhuma mensagem real e utilizada aqui.
+    </div>
+
+    <header class="topo">
+        <div class="marca">
+            <div class="logo-selo">
+                <img th:if="${appConfig.logoConfigurado}" th:src="@{${appConfig.logo}}" alt="Logotipo do gabinete"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+                <span class="logo-generico" th:text="${#strings.substring(appConfig.nomeGabinete,0,1)}"
+                      th:style="${appConfig.logoConfigurado} ? 'display:none' : 'display:grid'">G</span>
+            </div>
+            <div class="marca-texto">
+                <h1 th:text="${appConfig.tituloExibicao}">Gabinete Parlamentar</h1>
+                <span class="subtitulo" th:text="${appConfig.subtitulo}">Gestao de atendimentos</span>
+            </div>
+        </div>
+
+        <nav class="menu-principal" th:if="${#authorization.expression('isAuthenticated()')}">
+            <a th:href="@{/}" th:classappend="${paginaAtiva == 'inicio'} ? 'ativo'">Inicio</a>
+            <a th:href="@{/clientes}" th:classappend="${paginaAtiva == 'cidadaos'} ? 'ativo'">Cidadaos</a>
+            <a th:href="@{/agenda}" th:classappend="${paginaAtiva == 'agenda'} ? 'ativo'">Agenda</a>
+            <a th:if="${mensagensDisponivel}" th:href="@{/mensagens}" th:classappend="${paginaAtiva == 'mensagens'} ? 'ativo'">
+                <span th:text="${whatsappHabilitado} ? 'WhatsApp' : 'Mensagens'">WhatsApp</span>
+            </a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/usuarios}" th:classappend="${paginaAtiva == 'usuarios'} ? 'ativo'">Usuarios</a>
+            <span class="usuario-logado" sec:authentication="name">usuario</span>
+            <form th:action="@{/logout}" method="post" class="form-logout">
+                <button type="submit" class="btn secundario">Sair</button>
+            </form>
+        </nav>
+    </header>
+</div>
+
+<footer class="rodape" th:fragment="rodape">
+    <p th:text="${appConfig.rodape}">Sistema de Gestao de Gabinete</p>
+</footer>
+
+</body>
+</html>

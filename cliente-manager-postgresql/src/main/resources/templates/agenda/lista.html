@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appConfig.tituloExibicao} + ' - Agenda'"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('agenda')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Agenda</span><h2>Compromissos do gabinete</h2><p th:text="${nomeDoMes}"></p></div>
+        <a class="btn" th:href="@{/agenda/novo(data=${dataReferencia})}">+ Novo compromisso</a>
+    </section>
+
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+
+    <nav class="abas">
+        <a th:href="@{/agenda(visao='dia',data=${dataReferencia})}" th:classappend="${visao == 'dia'} ? 'ativo'">Dia</a>
+        <a th:href="@{/agenda(visao='semana',data=${dataReferencia})}" th:classappend="${visao == 'semana'} ? 'ativo'">Semana</a>
+        <a th:href="@{/agenda(visao='mes',data=${dataReferencia})}" th:classappend="${visao == 'mes'} ? 'ativo'">Mes</a>
+    </nav>
+
+    <div class="barra-acoes">
+        <form class="busca" method="get" th:action="@{/agenda}">
+            <input type="hidden" name="visao" th:value="${visao}">
+            <input type="text" name="q" placeholder="Buscar por titulo, local ou responsavel..." th:value="${param.q}">
+            <button type="submit" class="btn secundario">Buscar</button>
+        </form>
+    </div>
+
+    <div class="registros" th:if="${resultadosBusca != null}">
+        <p class="contador">Resultados da busca (<span th:text="${resultadosBusca.size()}"></span>)</p>
+        <div class="registro" style="grid-template-columns:1fr auto" th:each="c : ${resultadosBusca}">
+            <div class="principal">
+                <p class="nome" th:text="${c.titulo}"></p>
+                <span class="nascimento" th:text="${#temporals.format(c.data, 'dd/MM/yyyy')} + ' - ' + ${c.local}"></span>
+            </div>
+            <div class="acoes"><a class="btn secundario" th:href="@{/agenda/{id}(id=${c.id})}">Ver</a></div>
+        </div>
+    </div>
+
+    <div class="navegacao-periodo">
+        <a class="btn secundario" th:href="@{/agenda(visao=${visao},data=${anterior})}">&larr; Anterior</a>
+        <strong th:text="${#temporals.format(inicioPeriodo, 'dd/MM/yyyy')} + ' a ' + ${#temporals.format(fimPeriodo, 'dd/MM/yyyy')}"></strong>
+        <a class="btn secundario" th:href="@{/agenda(visao=${visao},data=${proximo})}">Proximo &rarr;</a>
+    </div>
+
+    <div th:if="${compromissos.isEmpty()}" class="vazio">
+        <p class="titulo-vazio">Nenhum compromisso neste periodo</p>
+        <p>Use o botao "Novo compromisso" para agendar o primeiro.</p>
+    </div>
+
+    <div th:unless="${compromissos.isEmpty()}">
+        <div class="dia-agenda" th:each="grupo : ${compromissosPorDia}">
+            <h3 th:text="${#temporals.format(grupo.key, 'EEEE, dd/MM/yyyy')}"></h3>
+            <div class="compromisso" th:each="c : ${grupo.value}">
+                <span class="horario" th:text="${c.diaInteiro} ? 'Dia todo' : (${c.horaInicio} + ' - ' + ${c.horaFim})"></span>
+                <div>
+                    <p class="titulo-compromisso" th:text="${c.titulo}"></p>
+                    <p class="meta" th:text="${c.tipo.descricao} + (${c.local != null and !c.local.isBlank()} ? ' - ' + ${c.local} : '')"></p>
+                </div>
+                <span th:class="'tag ' + ${#strings.toLowerCase(c.situacao.name())}" th:text="${c.situacao.descricao}"></span>
+                <a class="btn secundario" th:href="@{/agenda/{id}(id=${c.id})}">Ver</a>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

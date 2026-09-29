@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appConfig.tituloExibicao} + ' - Mensagens'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('mensagens')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Mensagens</span><h2 th:text="${whatsappHabilitado} ? 'Conversas de WhatsApp' : 'Simulacao de atendimento'"></h2>
+            <p th:if="${!whatsappHabilitado}">Nenhuma mensagem real sera enviada. Esta e uma simulacao visual para demonstracao.</p>
+        </div>
+    </section>
+
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+    <div class="aviso-simulacao" th:if="${modoSimulacao}">Nenhuma mensagem real sera enviada</div>
+
+    <div class="barra-acoes">
+        <form class="busca" method="get" th:action="@{/mensagens}">
+            <input type="text" name="q" placeholder="Buscar por nome ou telefone..." th:value="${termoBusca}">
+            <button type="submit" class="btn secundario">Buscar</button>
+        </form>
+    </div>
+
+    <div class="lista-conversas" th:if="${!conversas.isEmpty()}">
+        <a class="conversa-item" th:each="c : ${conversas}" th:href="@{/mensagens/{id}(id=${c.id})}">
+            <div>
+                <p class="nome-contato" th:text="${c.nomeContato != null and !c.nomeContato.isBlank()} ? ${c.nomeContato} : c.telefone"></p>
+                <span class="telefone" th:text="${c.telefone}"></span>
+            </div>
+            <span th:class="'pill ' + (${c.situacao.name() == 'ABERTA'} ? 'inativo' : (${c.situacao.name() == 'FINALIZADA'} ? 'ativo' : 'admin'))"
+                  th:text="${c.situacao.descricao}"></span>
+        </a>
+    </div>
+
+    <div class="vazio" th:if="${conversas.isEmpty()}">
+        <p class="titulo-vazio">Nenhuma conversa por aqui</p>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

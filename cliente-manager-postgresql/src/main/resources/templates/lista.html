@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appConfig.tituloExibicao} + ' - Cidadaos'">Cidadaos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: cabecalho('cidadaos')}"></div>
+
+<main>
+    <section class="page-head">
+        <div><span class="eyebrow">Visao geral</span><h2>Gestao de cidadaos</h2><p>Organize os contatos e acompanhe cada atendimento do gabinete.</p></div>
+        <a class="btn" th:href="@{/clientes/novo}">+ Cadastrar cidadao</a>
+    </section>
+
+    <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alerta erro" th:text="${erro}"></div>
+
+    <section class="aniversarios" th:if="${!aniversariantes.isEmpty()}">
+        <span class="icone" aria-hidden="true">&#127874;</span><div><h2>Aniversariantes de hoje</h2>
+        <p>
+            Hoje e aniversario de
+            <span th:each="pessoa, iter : ${aniversariantes}">
+                <a th:href="@{/clientes/{id}(id=${pessoa.id})}" th:text="${pessoa.nome}"></a><span th:if="${!iter.last}">, </span>
+            </span>.
+        </p></div>
+    </section>
+
+    <section class="metricas" aria-label="Resumo">
+        <div class="metrica destaque"><span>Total de cidadaos</span><strong th:text="${clientes.size()}">0</strong></div>
+        <div class="metrica"><span>Aniversariantes hoje</span><strong th:text="${aniversariantes.size()}">0</strong></div>
+        <div class="metrica"><span>Status do sistema</span><strong>Ativo</strong></div>
+    </section>
+
+    <div class="barra-acoes">
+        <form class="busca" method="get" th:action="@{/clientes}">
+            <input type="text" name="q" placeholder="Buscar por nome, CPF ou telefone..." th:value="${termoBusca}">
+            <button type="submit" class="btn secundario">Buscar</button>
+        </form>
+        <a class="btn secundario" th:href="@{/clientes}" th:if="${termoBusca != null and !termoBusca.isBlank()}">Limpar busca</a>
+    </div>
+
+    <p class="contador" th:if="${clientes.size() > 0}">
+        <span th:text="${clientes.size()}"></span> cidadao(s) registrado(s)
+    </p>
+
+    <div class="registros" th:if="${clientes.size() > 0}">
+        <div class="registro" th:each="cliente, iter : ${clientes}">
+            <div class="num" th:text="${#numbers.formatInteger(iter.count, 3)}"></div>
+
+            <div class="principal">
+                <p class="nome" th:text="${cliente.nome}"></p>
+                <span class="cpf" th:text="${cliente.cpf}"></span>
+                <span class="nascimento" th:if="${cliente.telefone != null and !cliente.telefone.isBlank()}"
+                      th:text="${cliente.telefone}"></span>
+                <span class="nascimento" th:if="${cliente.dataNascimento != null}"
+                      th:text="${#temporals.format(cliente.dataNascimento, 'dd/MM/yyyy')}"></span>
+            </div>
+
+            <div class="detalhes">
+                <p class="endereco" th:text="${cliente.endereco}"></p>
+                <p class="descricao" th:if="${cliente.descricao != null and !cliente.descricao.isBlank()}"
+                   th:text="${cliente.descricao}"></p>
+            </div>
+
+            <div class="acoes">
+                <a class="btn" th:href="@{/clientes/{id}(id=${cliente.id})}">Atendimentos</a>
+                <a class="btn secundario" th:href="@{/clientes/{id}/editar(id=${cliente.id})}">Editar</a>
+                <form th:action="@{/clientes/{id}/excluir(id=${cliente.id})}" method="post"
+                      sec:authorize="hasRole('ADMIN')"
+                      onsubmit="return confirm('Remover este cidadao do registro?');">
+                    <button type="submit" class="btn perigo">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="vazio" th:if="${clientes.size() == 0}">
+        <p class="titulo-vazio" th:if="${termoBusca != null and !termoBusca.isBlank()}">Nenhum registro encontrado</p>
+        <p class="titulo-vazio" th:unless="${termoBusca != null and !termoBusca.isBlank()}">O livro ainda esta em branco</p>
+        <p>Cadastre o primeiro cidadao para comecar o registro.</p>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/layout :: rodape}"></div>
+
+</body>
+</html>

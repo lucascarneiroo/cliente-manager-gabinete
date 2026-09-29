@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'Acesso negado - ' + ${appConfig.tituloExibicao}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="~{fragments/layout :: cores}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: cabecalho(null)}"></div>
+<main>
+    <div class="vazio">
+        <p class="titulo-vazio">Acesso negado</p>
+        <p>Voce nao tem permissao para acessar esta pagina ou realizar esta acao.</p>
+        <a class="btn" th:href="@{/}" style="margin-top:14px;display:inline-flex">Voltar ao inicio</a>
+    </div>
+</main>
+<div th:replace="~{fragments/layout :: rodape}"></div>
+</body>
+</html>

@@ -12,7 +12,7 @@
 <body>
 <div th:replace="~{fragments/layout :: cabecalho('cidadaos')}"></div>
 <main>
-    <section class="page-head"><div><span class="eyebrow">Historico do cidadao</span><h2 th:text="${cliente.nome}"></h2><p>Consulte e registre os atendimentos realizados.</p><p th:if="${cliente.telefone != null and !cliente.telefone.isBlank()}" th:text="|'Telefone: ' + ${cliente.telefone}|" class="endereco"></p></div></section>
+    <section class="page-head"><div><span class="eyebrow">Historico do cidadao</span><h2 th:text="${cliente.nome}"></h2><p>Consulte e registre os atendimentos realizados.</p><p th:if="${cliente.telefone != null and !cliente.telefone.isBlank()}" th:text="|Telefone: ${cliente.telefone}|" class="endereco"></p></div></section>
     <div th:if="${sucesso}" class="alerta sucesso" th:text="${sucesso}"></div>
     <div class="barra-acoes">
         <a class="btn secundario" th:href="@{/clientes}">Voltar aos cidadaos</a>
